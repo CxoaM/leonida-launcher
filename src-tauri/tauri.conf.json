@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Leonida Launcher",
+  "version": "1.0.0",
+  "identifier": "dev.leonida.launcher",
+  "build": {
+    "beforeDevCommand": "npm run dev:web",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build:web",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Leonida Launcher",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 980,
+        "minHeight": 660,
+        "center": true,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false,
+        "shadow": true,
+        "theme": "Dark",
+        "backgroundColor": "#0B0D10",
+        "visible": true,
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; script-src 'self'",
+      "devCsp": "default-src 'self'; img-src 'self' data: asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:1421 ws://localhost:1421 http://127.0.0.1:1420 http://localhost:1420; script-src 'self' 'unsafe-inline'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "msi"],
+    "createUpdaterArtifacts": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "publisher": "Leonida Launcher Contributors",
+    "copyright": "Copyright © 2026 Leonida Launcher Contributors",
+    "category": "Utility",
+    "shortDescription": "Install, update and build Leonida from your own game copy",
+    "longDescription": "Leonida Launcher installs the Leonida static recompilation project, keeps it in sync with the official upstream repository, verifies compatibility before every update, checks the Windows toolchain and drives the project's own build pipeline. It never downloads game files and never works around copy protection.",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "installer/header.bmp",
+        "sidebarImage": "installer/sidebar.bmp",
+        "installerHooks": "installer/hooks.nsh",
+        "languages": ["English", "Russian"],
+        "displayLanguageSelector": true,
+        "compression": "lzma"
+      },
+      "wix": {
+        "language": "en-US"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDA5Q0ExQ0YzQjIyNjE4RjEKUldUeEdDYXk4eHpLQ2ZUMW90a1Fqd0RjY1dCSG1nNWh2Ykt2cXF5MlN5eGVWUGJtVWtnbmpIV08K"
+    }
+  }
+}

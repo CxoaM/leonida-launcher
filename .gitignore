@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Frontend build output
+dist/
+.vite/
+*.tsbuildinfo
+
+# Rust / Tauri build output
+src-tauri/target/
+src-tauri/gen/schemas/
+*.pdb
+*.exe.manifest
+
+# Local verification fixtures (npm run mock:upstream)
+.tmp/
+
+# Never commit signing material, keys or credentials
+*.key
+*.key.pub
+*.pem
+*.pfx
+.env
+.env.*
+!.env.example
+
+# Logs and exported diagnostics
+logs/
+*.log
+diagnostics-*.json
+
+# Editors and OS noise
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

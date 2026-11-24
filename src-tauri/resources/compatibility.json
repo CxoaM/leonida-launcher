@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "adapterVersion": "1.0.0",
+  "upstream": {
+    "repository": "https://github.com/ubiquitarianism/leonida",
+    "defaultBranch": "main",
+    "lastVerifiedCommit": "a28927849adb4e40dfdec8c32fb6758dcd205a37",
+    "lastVerifiedAt": "2026-11-24",
+    "gameVersion": "1.0.2.1",
+    "displayName": "Leonida Continued"
+  },
+  "launcher": {
+    "minVersion": "1.0.0",
+    "maxMajor": 1
+  },
+  "requirements": {
+    "python": "3.12",
+    "dotnet": "8",
+    "windowsSdk": "10.0.26100",
+    "llvm": "21+ with AMDGPU target",
+    "freeGbFullBuild": 400
+  },
+  "expected": {
+    "requiredFiles": ["make_game.py", ".gitmodules"],
+    "optionalFiles": ["Build.bat", "Build.sh", "Mods.bat", "global.json"],
+    "requiredDirectories": ["tools", "runtime"],
+    "optionalDirectories": ["game", "docs", "tests", "scripts", "third_party"],
+    "submodules": [
+      { "path": "third_party/rpf9-explorer", "required": true }
+    ],
+    "cliProbe": ["-I", "make_game.py", "--help"],
+    "requiredFlags": [
+      "--game",
+      "--out",
+      "--work",
+      "--stages",
+      "--jobs",
+      "--no-tui"
+    ],
+    "optionalFlags": [
+      "--check",
+      "--find",
+      "--pick",
+      "--full-check",
+      "--wav",
+      "--wave64-emulate",
+      "--runtime-build",
+      "--no-float-controls",
+      "--bary-fallback",
+      "--texel-offset-fallback",
+      "--mesh-compute",
+      "--f16-interp-fallback",
+      "--pc-tail-ubo",
+      "--native-mesh"
+    ],
+    "knownStages": ["check", "shaders", "assets", "runtime", "pipelines"],
+    "requiredStages": ["check"],
+    "resumeMarker": "continues where it left off"
+  },
+  "notes": [
+    "This file describes what the launcher probes, not what a particular Leonida commit promises.",
+    "lastVerifiedCommit is a baseline. The live probe (make_game.py --help, folder layout, submodules) is the source of truth at runtime.",
+    "Update this baseline only after a full install, compatibility check and build run against that revision."
+  ]
+}

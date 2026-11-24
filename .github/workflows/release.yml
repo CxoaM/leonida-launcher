@@ -1,0 +1,187 @@
+name: Release
+
+# Publishing is tag driven on purpose: `v1.0.0` is the only thing that creates a
+# GitHub release. The workflow refuses to continue when the tag, package.json,
+# Cargo.toml and tauri.conf.json disagree, or when the updater signing key is
+# missing, so a release can never ship unsigned or mislabelled.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  NODE_VERSION: "22"
+
+jobs:
+  verify:
+    name: Verify before publishing
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Frontend checks
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Rust checks
+        working-directory: src-tauri
+        run: |
+          cargo fmt --all --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test --all-targets
+
+      - name: Tag matches every declared version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Tags must look like v1.2.3, got '$tag'."
+          }
+          $expected = $tag.Substring(1)
+          $pkg = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $conf = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          $cargo = (Select-String -Path src-tauri/Cargo.toml -Pattern '^version = "([^"]+)"').Matches[0].Groups[1].Value
+          Write-Host "tag=$expected package=$pkg tauri=$conf cargo=$cargo"
+          if ($pkg -ne $expected -or $conf -ne $expected -or $cargo -ne $expected) {
+            throw "Version mismatch. Update package.json, src-tauri/Cargo.toml and src-tauri/tauri.conf.json before tagging."
+          }
+
+      - name: Signing key is available
+        shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:TAURI_SIGNING_PRIVATE_KEY)) {
+            throw "TAURI_SIGNING_PRIVATE_KEY is not set. Signed launcher updates require it; refusing to publish."
+          }
+
+  release:
+    name: Build, sign and publish
+    needs: verify
+    runs-on: windows-latest
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and publish the release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Leonida Launcher ${{ github.ref_name }}"
+          releaseBody: |
+            Windows 10/11 x64 installer for Leonida Launcher.
+
+            - `LeonidaLauncher-Setup-x64.exe` — NSIS installer (recommended).
+            - `*.msi` — optional MSI package for managed deployments.
+            - `latest.json` — signed updater manifest used by the launcher's self-update.
+            - `SHA256SUMS.txt` — checksums for every published file.
+
+            See `CHANGELOG.md` in the repository for the full list of changes.
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          args: --bundles nsis,msi
+
+      # Keeps the signed updater filenames intact (latest.json points at them)
+      # while publishing one predictable name for humans and the README.
+      - name: Publish a stable download name
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $nsis = Get-ChildItem "src-tauri/target/release/bundle/nsis" -Filter "*-setup.exe" |
+            Select-Object -First 1
+          if (-not $nsis) { throw "The NSIS installer was not produced." }
+          $stable = Join-Path $nsis.DirectoryName "LeonidaLauncher-Setup-x64.exe"
+          Copy-Item $nsis.FullName $stable -Force
+          gh release upload $tag $stable --clobber
+          if (Test-Path "$($nsis.FullName).sig") {
+            Copy-Item "$($nsis.FullName).sig" "$stable.sig" -Force
+            gh release upload $tag "$stable.sig" --clobber
+          }
+
+      - name: Publish checksums
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $bundle = "src-tauri/target/release/bundle"
+          $files = Get-ChildItem $bundle -Recurse -File |
+            Where-Object { $_.Extension -in ".exe", ".msi" -or $_.Name -like "*.nsis.zip*" }
+          if (-not $files) { throw "No installer was produced under $bundle" }
+          $lines = foreach ($file in $files) {
+            $hash = (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($file.Name)"
+          }
+          $lines | Set-Content -Path SHA256SUMS.txt -Encoding ascii
+          Get-Content SHA256SUMS.txt
+          gh release upload $tag SHA256SUMS.txt --clobber
+
+      - name: Confirm the updater manifest exists
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $assets = gh release view $tag --json assets --jq '.assets[].name'
+          Write-Host ($assets -join ", ")
+          if ($assets -notcontains "latest.json") {
+            throw "latest.json is missing, so the launcher could not update itself from this release."
+          }
+          if (-not ($assets | Where-Object { $_ -like "*.exe" })) {
+            throw "No NSIS installer was attached to the release."
+          }

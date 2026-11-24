@@ -1,0 +1,8 @@
+{
+  "owner": "CxoaM",
+  "repository": "leonida-launcher",
+  "upstreamRepository": "https://github.com/ubiquitarianism/leonida",
+  "license": "MIT",
+  "channel": "stable",
+  "notes": "Owner and repository are baked in by scripts/configure.mjs. The updater endpoint is derived from them at build time."
+}
