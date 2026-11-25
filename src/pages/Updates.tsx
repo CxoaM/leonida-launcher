@@ -34,11 +34,11 @@ import { relativeTime, shortCommit } from "@/lib/format";
 
 const STAGES = ["preflight", "fetch", "backup", "merge", "submodules", "verify", "done"] as const;
 
-function CommitRow({ commit, tone }: { commit: CommitInfo; tone?: "accent" }) {
+function CommitRow({ commit }: { commit: CommitInfo }) {
   return (
     <li className="flex items-start gap-2.5 py-[7px]">
       <span className="mt-[3px]">
-        <Dot tone={tone ?? "neutral"} />
+        <Dot tone="neutral" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[12.5px] text-ink" title={commit.subject}>
@@ -246,11 +246,11 @@ export function UpdatesPage() {
           />
         </Card>
       ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.25fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+          <div className="min-w-0 space-y-4">
             <Card>
               <CardHeader
-                title={`${t("updates.heading")} · ${t("updates.label.installed")}`}
+                title={t("home.label.updates")}
                 icon={<GitBranch size={13} />}
                 action={stateBadge(upstreamCheck)}
               />
@@ -263,7 +263,6 @@ export function UpdatesPage() {
                       compact
                       icon={<Clock size={15} />}
                       title={t("home.updatesUnknown")}
-                      body={t("updates.subheading")}
                       action={
                         <Button size="sm" onClick={() => void check()} loading={checking}>
                           {t("updates.action.check")}
@@ -297,7 +296,7 @@ export function UpdatesPage() {
                       <Pill>{relativeTime(upstreamCheck.checkedAt, t, locale)}</Pill>
                     </div>
 
-                    <div className="mt-3 divide-y divide-[#1d242d]">
+                    <div className="mt-3 divide-y divide-line-soft">
                       <KeyValue
                         label={t("updates.label.installed")}
                         value={`${shortCommit(upstreamCheck.installedCommit)} · ${upstreamCheck.installedSubject ?? "—"}`}
@@ -325,9 +324,9 @@ export function UpdatesPage() {
                     {upstreamCheck.commits.length > 0 ? (
                       <div className="mt-4">
                         <div className="label-xs mb-1">{t("updates.label.commits")}</div>
-                        <ul className="divide-y divide-[#1d242d]">
+                        <ul className="divide-y divide-line-soft">
                           {upstreamCheck.commits.slice(0, 8).map((commit) => (
-                            <CommitRow key={commit.sha} commit={commit} tone="accent" />
+                            <CommitRow key={commit.sha} commit={commit} />
                           ))}
                         </ul>
                       </div>
@@ -342,55 +341,6 @@ export function UpdatesPage() {
               </CardBody>
             </Card>
 
-            <div className="space-y-4">
-              <Card>
-                <CardHeader title={t("updates.stage.backup")} icon={<ShieldCheck size={13} />} />
-                <CardBody className="space-y-2.5 pt-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[12px] text-muted">
-                      {applying
-                        ? updateProgress?.label ?? t("status.busy")
-                        : t("build.status.idle")}
-                    </span>
-                    {applying ? <Badge tone="accent">{t("jobs.running")}</Badge> : null}
-                  </div>
-                  <Progress value={null} className={applying ? "" : "opacity-40"} />
-                  <StepList steps={stageSteps} className="pt-1" />
-                  {updateProgress && applying ? (
-                    <p className="truncate font-mono text-[10.5px] text-faint" title={updateProgress.detail}>
-                      {updateProgress.detail}
-                    </p>
-                  ) : null}
-                </CardBody>
-              </Card>
-
-              <Card>
-                <CardHeader
-                  title={t("updates.verify.title")}
-                  icon={<ShieldCheck size={13} />}
-                  action={
-                    <Badge tone={compatibilityStatus === "compatible" ? "ok" : compatibilityStatus === "incompatible" ? "danger" : "warn"}>
-                      {t(`compat.${compatibilityStatus}` as MessageKey)}
-                    </Badge>
-                  }
-                />
-                <CardBody className="pt-3">
-                  <p className="text-[11.5px] leading-[1.5] text-muted">{t("updates.verify.body")}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => void refreshCompatibility()}
-                    >
-                      {t("install.action.recheck")}
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader
                 title={t("updates.restore.title")}
@@ -403,7 +353,7 @@ export function UpdatesPage() {
                 ) : restorePoints.length === 0 ? (
                   <EmptyState compact title={t("updates.restore.empty")} body={t("updates.restore.hint")} />
                 ) : (
-                  <ul className="divide-y divide-[#1d242d]">
+                  <ul className="divide-y divide-line-soft">
                     {restorePoints.slice(0, 6).map((point) => (
                       <li key={point.backupRef} className="flex items-center justify-between gap-3 py-2">
                         <span className="min-w-0">
@@ -448,7 +398,7 @@ export function UpdatesPage() {
                 ) : history.length === 0 ? (
                   <EmptyState compact title={t("updates.history.empty")} />
                 ) : (
-                  <ul className="divide-y divide-[#1d242d]">
+                  <ul className="divide-y divide-line-soft">
                     {history.slice(0, 8).map((entry) => (
                       <li key={entry.id} className="flex items-start justify-between gap-3 py-2">
                         <span className="min-w-0">
@@ -487,6 +437,65 @@ export function UpdatesPage() {
               </CardFooter>
             </Card>
           </div>
+
+          <div className="min-w-0 space-y-4">
+            <Card>
+              <CardHeader title={t("updates.progress.title")} icon={<Zap size={13} />} />
+              <CardBody className="space-y-2.5 pt-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[12px] text-muted">
+                    {applying ? updateProgress?.label ?? t("status.busy") : t("status.idle")}
+                  </span>
+                  {applying ? <Badge tone="accent">{t("jobs.running")}</Badge> : null}
+                </div>
+                <Progress value={applying ? null : 0} />
+                {applying ? (
+                  <StepList steps={stageSteps} className="pt-1" />
+                ) : (
+                  <p className="font-mono text-[10.5px] leading-[1.7] text-faint">
+                    {STAGES.map((id) => t(`updates.stage.${id}` as MessageKey)).join(" → ")}
+                  </p>
+                )}
+                {updateProgress && applying ? (
+                  <p className="truncate font-mono text-[10.5px] text-faint" title={updateProgress.detail}>
+                    {updateProgress.detail}
+                  </p>
+                ) : null}
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader
+                title={t("updates.compat.title")}
+                icon={<ShieldCheck size={13} />}
+                action={
+                  <Badge tone={compatibilityStatus === "compatible" ? "ok" : compatibilityStatus === "incompatible" ? "danger" : "warn"}>
+                    {t(`compat.${compatibilityStatus}` as MessageKey)}
+                  </Badge>
+                }
+              />
+              <CardBody className="pt-3">
+                {upstreamCheck?.updateAvailable ? (
+                  <p className="text-[11.5px] leading-[1.5] text-muted">{t("updates.verify.body")}</p>
+                ) : (
+                  <p className="font-mono text-[10.5px] text-faint">
+                    {upstreamCheck
+                      ? relativeTime(upstreamCheck.checkedAt, t, locale)
+                      : t("home.updatesUnknown")}
+                  </p>
+                )}
+                <div className="mt-3 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void refreshCompatibility()}
+                  >
+                    {t("install.action.recheck")}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
         </div>
       )}
 
@@ -522,12 +531,12 @@ export function UpdatesPage() {
             value={String(upstreamCheck?.behind ?? 0)}
             mono
           />
-          <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-[8px] border border-line-soft bg-[#11161c] p-2.5">
+          <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-[8px] border border-line-soft bg-base-soft p-2.5">
             <input
               type="checkbox"
               checked={allowUnverified}
               onChange={(event) => setAllowUnverified(event.target.checked)}
-              className="mt-[2px] accent-[#8EA9FF]"
+              className="mt-[2px] accent-accent"
             />
             <span className="text-[11.5px] leading-[1.5] text-muted">
               {t("updates.verify.allowUnverified")}
@@ -560,7 +569,7 @@ export function UpdatesPage() {
             {t("updates.verify.body")}
           </InlineNote>
           {verifyError?.detail ? (
-            <pre className="log max-h-52 overflow-auto whitespace-pre-wrap rounded-[8px] bg-[#0a0d11] p-2.5 text-[10.5px] text-muted">
+            <pre className="log max-h-52 overflow-auto whitespace-pre-wrap rounded-[8px] bg-console p-2.5 text-[10.5px] text-muted">
               {verifyError.detail}
             </pre>
           ) : null}

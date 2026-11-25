@@ -29,16 +29,16 @@ export function StatusBar() {
   const tone = compatibilityTone(compatibilityStatus);
 
   return (
-    <footer className="flex h-[30px] shrink-0 items-center justify-between gap-4 border-t border-line-soft bg-[#0c0f13] px-3 text-[11px] text-faint">
+    <footer className="flex h-8 shrink-0 items-center justify-between gap-4 border-t border-line-soft bg-base-soft px-3 text-[11px] text-faint">
       <button
         type="button"
         onClick={() => setPage("installation")}
-        className="focus-ring flex min-w-0 items-center gap-2 rounded-[5px] px-1 py-[2px] transition-colors hover:text-muted"
+        className="focus-ring flex min-w-0 items-center gap-2 rounded-[4px] px-1 py-0.5 transition-colors hover:text-muted"
       >
         <GitBranch size={12} className="shrink-0" />
-        <span className="truncate">
+        <span className="truncate font-mono text-[10.5px]">
           {installation?.installed
-            ? `${installation.branch ?? "detached"} · ${installation.shortCommit ?? ""}`
+            ? `${installation.branch ?? "detached"} @ ${installation.shortCommit ?? ""}`
             : t("status.noRepository")}
         </span>
         {installation?.installed && installation.dirtyFiles > 0 ? (

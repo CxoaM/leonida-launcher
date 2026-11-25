@@ -39,7 +39,7 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
       <div
-        className="absolute inset-0 bg-[#05070a]/72 backdrop-blur-[2px] animate-fade-in"
+        className="absolute inset-0 animate-fade-in bg-[#080706]/72"
         onClick={onClose}
         aria-hidden
       />
@@ -47,7 +47,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "card animate-scale-in relative w-full overflow-hidden",
+          "card animate-rise-in relative w-full shadow-[0_24px_64px_rgb(0_0_0/0.5)]",
           width,
           tone === "danger" && "border-[#4a2b2d]",
           tone === "warn" && "border-[#4a3a1d]",
@@ -57,27 +57,27 @@ export function Modal({
           <div className="min-w-0">
             <h2
               className={cn(
-                "text-[14px] font-semibold tracking-[-0.01em]",
+                "text-[14px] font-medium",
                 tone === "danger" ? "text-danger" : tone === "warn" ? "text-warn" : "text-ink",
               )}
             >
               {title}
             </h2>
             {description ? (
-              <p className="mt-1 text-[12.5px] leading-[1.5] text-muted">{description}</p>
+              <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">{description}</p>
             ) : null}
           </div>
           <button
             type="button"
             aria-label={t("common.close")}
             onClick={onClose}
-            className="focus-ring -mr-1 -mt-1 rounded-[6px] p-1 text-faint transition-colors hover:bg-[#1b222b] hover:text-ink"
+            className="focus-ring -mr-1 -mt-1 rounded-[6px] p-1 text-faint transition-colors hover:bg-raised hover:text-ink"
           >
             <X size={15} />
           </button>
         </div>
         {children ? <div className="px-5 py-4">{children}</div> : <div className="h-2" />}
-        <div className="flex items-center justify-end gap-2 border-t border-line-soft bg-[#12171e] px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-line-soft bg-base-soft px-5 py-3">
           {footer ?? <Button onClick={onClose}>{t("common.close")}</Button>}
         </div>
       </div>

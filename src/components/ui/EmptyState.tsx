@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/format";
 
+const iconTone = {
+  neutral: "text-faint",
+  warn: "text-warn",
+  danger: "text-danger",
+};
+
 export function EmptyState({
   icon,
   title,
@@ -19,28 +25,22 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center",
-        compact ? "gap-2 px-4 py-6" : "gap-2.5 px-6 py-12",
+        "flex flex-col items-start",
+        compact ? "gap-1.5 py-4" : "gap-2 py-8",
       )}
     >
       {icon ? (
-        <span
-          className={cn(
-            "mb-1 flex items-center justify-center rounded-[10px] border",
-            compact ? "h-8 w-8" : "h-10 w-10",
-            tone === "warn" && "border-[#4a3a1d] bg-[#241d12] text-warn",
-            tone === "danger" && "border-[#482a2d] bg-[#241618] text-danger",
-            tone === "neutral" && "border-line-soft bg-[#141a21] text-muted",
-          )}
-        >
+        <span className={cn("mb-0.5 shrink-0", compact ? "" : "mb-1", iconTone[tone])}>
           {icon}
         </span>
       ) : null}
-      <h3 className="text-[13px] font-medium text-ink">{title}</h3>
+      <h3 className={cn("font-medium text-ink", compact ? "text-[12.5px]" : "text-[14px]")}>
+        {title}
+      </h3>
       {body ? (
-        <p className="max-w-[56ch] text-[12px] leading-[1.55] text-muted">{body}</p>
+        <p className="max-w-[62ch] text-[12px] leading-[1.55] text-muted">{body}</p>
       ) : null}
-      {action ? <div className="mt-2 flex items-center gap-2">{action}</div> : null}
+      {action ? <div className="mt-1.5 flex items-center gap-2">{action}</div> : null}
     </div>
   );
 }
@@ -61,7 +61,12 @@ export function KeyValue({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-start justify-between gap-6 py-[7px]", className)}>
+    <div
+      className={cn(
+        "flex min-h-8 items-start justify-between gap-6 py-1.5",
+        className,
+      )}
+    >
       <span className="shrink-0 text-[12px] text-muted">{label}</span>
       <span className="flex min-w-0 items-center gap-1.5">
         <span
@@ -91,17 +96,17 @@ export function InlineNote({
   className?: string;
 }) {
   const styles = {
-    neutral: "border-line-soft bg-[#141a21] text-muted",
-    accent: "border-accent-line bg-accent-soft text-[#b9c9ff]",
-    warn: "border-[#4a3a1d] bg-[#221b10] text-[#e0c58f]",
-    danger: "border-[#482a2d] bg-[#231618] text-[#eaa4a4]",
-    ok: "border-[#234333] bg-[#131f19] text-[#a8dcc2]",
+    neutral: "border-line bg-base-soft text-muted",
+    accent: "border-accent-line bg-accent-soft text-muted",
+    warn: "border-[#453821] bg-[#1c1811] text-[#d8c194]",
+    danger: "border-[#4a2e2b] bg-[#1e1513] text-[#e0a49c]",
+    ok: "border-[#313d2b] bg-[#151a13] text-[#b6ccae]",
   }[tone];
 
   return (
     <div
       className={cn(
-        "flex items-start gap-2.5 rounded-[10px] border px-3 py-2.5 text-[11.5px] leading-[1.5]",
+        "flex items-start gap-2.5 rounded-r-[6px] border-y-0 border-r-0 border-l-2 px-3 py-2 text-[11.5px] leading-[1.55]",
         styles,
         className,
       )}

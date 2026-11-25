@@ -29,13 +29,13 @@ const pages: Record<PageId, ComponentType> = {
 function BootScreen() {
   const t = useT();
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 bg-base">
-      <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-accent-line bg-accent-soft text-accent">
-        <LoaderCircle size={20} className="animate-spin" />
+    <div className="flex h-full flex-col items-start justify-center gap-4 bg-base px-8">
+      <span className="text-accent">
+        <LoaderCircle size={18} className="animate-spin" />
       </span>
-      <div className="text-center">
-        <p className="text-[13px] font-medium text-ink">{t("app.name")}</p>
-        <p className="mt-0.5 text-[11.5px] text-faint">{t("boot.starting")}</p>
+      <div>
+        <p className="display text-[18px] text-ink">{t("app.name")}</p>
+        <p className="mt-1 text-[12px] text-faint">{t("boot.starting")}</p>
       </div>
     </div>
   );
@@ -44,21 +44,21 @@ function BootScreen() {
 function FatalScreen({ message }: { message: string }) {
   const t = useT();
   return (
-    <div className="flex h-full items-center justify-center bg-base p-8">
-      <div className="card w-full max-w-xl overflow-hidden">
-        <div className="flex items-start gap-3 px-5 py-4">
-          <span className="mt-[1px] flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] border border-[#482a2d] bg-[#241618] text-danger">
-            <TriangleExclamationPoint size={15} />
+    <div className="flex h-full items-start justify-center bg-base px-8 pt-24">
+      <div className="card w-full max-w-xl">
+        <div className="flex items-start gap-3 border-b border-line-soft px-5 py-4">
+          <span className="mt-[1px] shrink-0 text-danger">
+            <TriangleExclamationPoint size={16} />
           </span>
           <div className="min-w-0">
-            <h1 className="text-[14px] font-semibold text-ink">{t("boot.failed.title")}</h1>
+            <h1 className="display text-[16px] text-ink">{t("boot.failed.title")}</h1>
             <p className="mt-1 text-[12px] leading-[1.55] text-muted">{t("boot.failed.body")}</p>
           </div>
         </div>
-        <pre className="log scroll-thin mx-5 mb-4 max-h-48 overflow-auto rounded-[8px] border border-line-soft bg-[#090c10] p-2.5">
+        <pre className="log scroll-thin mx-5 my-4 max-h-48 overflow-auto rounded-[8px] bg-console p-3">
           {message}
         </pre>
-        <div className="flex justify-end border-t border-line-soft bg-[#12171e] px-5 py-3">
+        <div className="flex justify-end border-t border-line-soft bg-base-soft px-5 py-3">
           <Button variant="primary" onClick={() => window.location.reload()}>
             {t("boot.retry")}
           </Button>
@@ -97,7 +97,7 @@ export function App() {
       <div className="flex min-h-0 flex-1">
         <Sidebar />
         <main className="scroll-thin min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1180px] px-6 py-5">
+          <div className="mx-auto w-full max-w-[1360px] px-8 py-6">
             <Page />
           </div>
         </main>

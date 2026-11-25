@@ -1,20 +1,12 @@
 import {
-  ArrowRight,
   Boxes,
-  CircleCheck as CheckCircle2,
   Cpu,
   FolderOpen,
-  Gauge,
-  GitBranch,
   HardDriveDownload,
   Hammer,
-  Info,
   MemoryStick,
   Monitor,
-  PackageCheck,
   RefreshCw,
-  ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import type { PageId } from "@/types";
 import type { MessageKey } from "@/i18n/dictionary";
@@ -22,10 +14,11 @@ import { useApp } from "@/state/AppContext";
 import { dateLocale, useI18n } from "@/i18n";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Badge, Dot, Pill } from "@/components/ui/Badge";
+import { Badge, Dot } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { EmptyState, InlineNote, KeyValue } from "@/components/ui/EmptyState";
 import { SkeletonRows } from "@/components/ui/Progress";
+import { StageRail, type RailStep } from "@/components/StepList";
 import { basename, gib } from "@/lib/format";
 import { revealPath } from "@/lib/tauri";
 import { compatibilityTone } from "@/lib/ui";
@@ -69,6 +62,7 @@ export function HomePage() {
     (dep) => dep.kind !== "required" && dep.status !== "installed",
   ).length;
   const compatibilityStatus = compatibility?.status ?? "unknown";
+  const buildStatus = summary?.build.status ?? "idle";
 
   const needsAttention =
     installed && (compatibilityStatus === "incompatible" || requiredMissing > 0);
@@ -85,14 +79,44 @@ export function HomePage() {
       : "home.status.readyBody";
   const statusTone = !installed ? "neutral" : needsAttention ? "warn" : "ok";
 
-  const steps: Array<{ key: MessageKey; done: boolean; page: PageId }> = [
-    { key: "home.nextStep.install", done: installed, page: "installation" },
-    { key: "home.nextStep.game", done: installation?.gameValid ?? false, page: "installation" },
-    { key: "home.nextStep.deps", done: requiredMissing === 0, page: "diagnostics" },
-    { key: "home.nextStep.compat", done: compatibilityStatus === "compatible", page: "updates" },
-    { key: "home.nextStep.build", done: summary?.build.status === "succeeded", page: "build" },
+  const rail: RailStep[] = [
+    {
+      id: "installation",
+      label: t("home.rail.checkout"),
+      status: installed ? "done" : "pending",
+      detail: installed ? (installation?.branch ?? t("common.ok")) : t("home.rail.missing"),
+    },
+    {
+      id: "installation",
+      label: t("home.rail.game"),
+      status: installation?.gameValid ? "done" : "pending",
+      detail: installation?.gameValid ? t("common.ok") : t("home.rail.missing"),
+    },
+    {
+      id: "diagnostics",
+      label: t("home.rail.deps"),
+      status: requiredMissing === 0 ? "done" : "pending",
+      detail:
+        requiredMissing > 0
+          ? t("home.depsMissing", { count: requiredMissing })
+          : t("home.depsAllGood"),
+    },
+    {
+      id: "updates",
+      label: t("home.rail.compat"),
+      status: compatibilityStatus === "compatible" ? "done" : "pending",
+      detail: t(`compat.${compatibilityStatus}` as MessageKey),
+    },
+    {
+      id: "build",
+      label: t("home.rail.build"),
+      status: buildStatus === "succeeded" ? "done" : "pending",
+      detail:
+        buildStatus === "succeeded"
+          ? t("common.ok")
+          : t(`build.status.${buildStatus}` as MessageKey),
+    },
   ];
-  const nextStep = steps.find((step) => !step.done);
 
   const quickAction = !installed ? (
     <Button variant="primary" icon={<HardDriveDownload size={14} />} onClick={() => setPage("installation")}>
@@ -124,59 +148,62 @@ export function HomePage() {
         }
       />
 
-      <div className="space-y-4">
-        <Card className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_150%_at_0%_0%,rgba(142,169,255,0.10),transparent_58%)]"
-          />
-          <CardBody className="relative px-5 py-4.5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0">
-                <span className="flex items-center gap-2">
-                  <Dot tone={statusTone} pulse={statusTone === "ok"} />
-                  <span className="label-xs">{t("app.tagline")}</span>
-                </span>
-                <h2 className="mt-2 text-[17px] font-semibold tracking-[-0.015em] text-ink">
-                  {t(statusKey)}
-                </h2>
-                <p className="mt-1 max-w-[68ch] text-[12.5px] leading-[1.55] text-muted">
-                  {t(statusBodyKey)}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button size="sm" icon={<RefreshCw size={13} />} onClick={() => setPage("updates")}>
-                  {t("home.quick.update")}
-                </Button>
-                <Button size="sm" variant="ghost" icon={<Gauge size={13} />} onClick={() => setPage("diagnostics")}>
-                  {t("home.quick.diagnostics")}
-                </Button>
-              </div>
-            </div>
+      <section className="pb-1">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <span className="mt-[9px] shrink-0">
+            <Dot tone={statusTone} />
+          </span>
+          <div className="min-w-0">
+            <h2 className="display text-[22px] leading-[1.2] text-ink">{t(statusKey)}</h2>
+            <p className="mt-1 max-w-[64ch] text-[12.5px] leading-[1.6] text-muted">
+              {t(statusBodyKey)}
+            </p>
+          </div>
+        </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-1.5">
-              <Pill>
-                {t("home.label.launcher")} {summary?.metadata.version ?? launcherRelease?.currentVersion ?? "—"}
-              </Pill>
-              {installed ? (
-                <>
-                  <Pill>
-                    <GitBranch size={10} className="mr-1" />
-                    {installation?.branch ?? "detached"} · {installation?.shortCommit ?? "—"}
-                  </Pill>
-                  <Badge tone={compatibilityTone(compatibilityStatus)}>
-                    {t(`compat.${compatibilityStatus}` as MessageKey)}
-                  </Badge>
-                </>
-              ) : null}
-              {upstreamCheck?.updateAvailable ? (
-                <Badge tone="accent">{t("home.updatesAvailable", { count: upstreamCheck.behind })}</Badge>
-              ) : null}
-            </div>
-          </CardBody>
-        </Card>
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 pl-0 sm:pl-[22px]">
+          <span className="font-mono text-[10.5px] text-faint">
+            {t("home.label.launcher")}{" "}
+            {summary?.metadata.version ?? launcherRelease?.currentVersion ?? "—"}
+          </span>
+          {installed ? (
+            <>
+              <span className="font-mono text-[10.5px] text-faint">
+                {installation?.branch ?? "detached"} · {installation?.shortCommit ?? "—"}
+              </span>
+              <Badge tone={compatibilityTone(compatibilityStatus)}>
+                {t(`compat.${compatibilityStatus}` as MessageKey)}
+              </Badge>
+            </>
+          ) : null}
+          {upstreamCheck?.updateAvailable ? (
+            <Badge tone="accent">{t("home.updatesAvailable", { count: upstreamCheck.behind })}</Badge>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setPage("updates")}
+            className="focus-ring rounded-[2px] font-mono text-[10.5px] text-faint transition-colors hover:text-ink"
+          >
+            {t("home.quick.update")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage("diagnostics")}
+            className="focus-ring rounded-[2px] font-mono text-[10.5px] text-faint transition-colors hover:text-ink"
+          >
+            {t("home.quick.diagnostics")}
+          </button>
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <StageRail
+          className="mt-5"
+          steps={rail}
+          onSelect={(id) => setPage(id as PageId)}
+        />
+      </section>
+
+      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_336px]">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader
               title={t("home.card.installation")}
@@ -187,7 +214,7 @@ export function HomePage() {
                 </Button>
               }
             />
-            <CardBody className="pt-2">
+            <CardBody className="pt-3">
               {!summary ? (
                 <SkeletonRows rows={6} />
               ) : !installed ? (
@@ -203,7 +230,7 @@ export function HomePage() {
                   }
                 />
               ) : (
-                <div className="divide-y divide-[#1d242d]">
+                <div className="divide-y divide-line-soft">
                   <KeyValue
                     label={t("home.label.branch")}
                     value={installation?.branch ?? "detached"}
@@ -251,7 +278,7 @@ export function HomePage() {
                           type="button"
                           aria-label={t("common.open")}
                           onClick={() => void revealPath(settings.outPath)}
-                          className="focus-ring rounded-[4px] p-[2px] text-faint transition-colors hover:text-ink"
+                          className="focus-ring rounded-[3px] p-[2px] text-faint transition-colors hover:text-ink"
                         >
                           <FolderOpen size={12} />
                         </button>
@@ -270,135 +297,49 @@ export function HomePage() {
                   />
                 </div>
               )}
+              {installed && installation?.restorePoint ? (
+                <InlineNote tone="neutral" className="mt-3">
+                  {t("updates.restore.hint")}
+                </InlineNote>
+              ) : null}
             </CardBody>
           </Card>
 
-          <div className="space-y-4">
-            <Card>
-              <CardHeader title={t("home.card.environment")} icon={<Monitor size={13} />} />
-              <CardBody className="pt-2">
-                {!summary ? (
-                  <SkeletonRows rows={5} />
-                ) : (
-                  <div className="divide-y divide-[#1d242d]">
-                    <KeyValue
-                      label={summary.environment.osName || "Windows"}
-                      value={`${summary.environment.osVersion} · ${summary.environment.osBuild}`}
-                      mono
-                    />
-                    <KeyValue
-                      label={
-                        <span className="flex items-center gap-1.5">
-                          <Cpu size={11} />
-                          {t("home.label.cores", { count: summary.environment.cpuCores })}
-                        </span>
-                      }
-                      value={summary.environment.cpuName}
-                      title={summary.environment.cpuName}
-                    />
-                    <KeyValue
-                      label={<span className="flex items-center gap-1.5"><MemoryStick size={11} />RAM</span>}
-                      value={`${Math.round(summary.environment.memoryAvailableMb / 1024)} / ${Math.round(summary.environment.memoryTotalMb / 1024)} GB`}
-                      mono
-                    />
-                    <KeyValue
-                      label={t("home.label.longPaths")}
-                      value={
-                        summary.environment.longPaths === null
-                          ? t("common.unknown")
-                          : summary.environment.longPaths
-                            ? t("common.ok")
-                            : t("common.warning")
-                      }
-                    />
-                    <KeyValue
-                      label={t("home.label.freeSpace")}
-                      value={
-                        summary.disks.length === 0
-                          ? "—"
-                          : summary.disks
-                              .map((disk) => `${gib(disk.freeBytes)} ${disk.volume}`)
-                              .join(" · ")
-                      }
-                      mono
-                    />
-                  </div>
-                )}
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardHeader title={t("home.card.nextSteps")} icon={<Sparkles size={13} />} />
-              <CardBody className="space-y-1 pt-2">
-                {steps.map((step) => (
-                  <button
-                    key={step.key}
-                    type="button"
-                    onClick={() => setPage(step.page)}
-                    className="group flex w-full items-center gap-2.5 rounded-[7px] px-1.5 py-[7px] text-left transition-colors hover:bg-[#171d25]"
-                  >
-                    {step.done ? (
-                      <CheckCircle2 size={14} className="shrink-0 text-ok" />
-                    ) : (
-                      <span className="h-[13px] w-[13px] shrink-0 rounded-full border border-[#39424f]" />
-                    )}
-                    <span
-                      className={
-                        step.done
-                          ? "flex-1 text-[12.5px] text-faint line-through decoration-[#39424f]"
-                          : "flex-1 text-[12.5px] text-ink"
-                      }
-                    >
-                      {t(step.key)}
-                    </span>
-                    {!step.done ? (
-                      <ArrowRight
-                        size={12}
-                        className="shrink-0 text-faint opacity-0 transition-opacity group-hover:opacity-100"
-                      />
-                    ) : null}
-                  </button>
-                ))}
-                {!nextStep ? (
-                  <p className="px-1.5 pt-1 text-[11.5px] text-faint">
-                    {t("home.nextStep.done")}
-                  </p>
-                ) : null}
-              </CardBody>
-            </Card>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_1fr]">
           <Card>
             <CardHeader
               title={t("home.card.activity")}
-              icon={<Sparkles size={13} />}
               action={
-                <Pill>{`${activity.length}`}</Pill>
+                <span className="font-mono text-[10.5px] text-faint">
+                  {activity.length === 0 ? "—" : `${activity.length}`}
+                </span>
               }
             />
-            <CardBody className="pt-1.5">
+            <CardBody className="pt-2">
               {activity.length === 0 ? (
                 <EmptyState compact title={t("home.activity.empty")} />
               ) : (
-                <ul className="divide-y divide-[#1d242d]">
+                <ul className="divide-y divide-line-soft">
                   {activity
                     .slice(-7)
                     .reverse()
                     .map((line, index) => (
-                      <li key={`${line.timestamp}-${index}`} className="flex items-start gap-2.5 py-[6px]">
-                        <span className="mt-[3px] font-mono text-[10px] text-faint">
+                      <li key={`${line.timestamp}-${index}`} className="flex items-start gap-3 py-[7px]">
+                        <span className="mt-[2px] shrink-0 font-mono text-[10px] text-faint">
                           {new Date(line.timestamp).toLocaleTimeString(locale, {
                             hour: "2-digit",
                             minute: "2-digit",
                             second: "2-digit",
                           })}
                         </span>
-                        <span className={`mt-[2px] text-[10px] font-medium uppercase ${levelTone(line.level)}`}>
+                        <span
+                          className={`mt-[2px] w-9 shrink-0 font-mono text-[10px] ${levelTone(line.level)}`}
+                        >
                           {line.level}
                         </span>
-                        <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted" title={line.message}>
+                        <span
+                          className="min-w-0 flex-1 truncate text-[12px] text-muted"
+                          title={line.message}
+                        >
                           {line.message}
                         </span>
                       </li>
@@ -407,36 +348,89 @@ export function HomePage() {
               )}
             </CardBody>
           </Card>
+        </div>
 
+        <div className="min-w-0 space-y-4">
           <Card>
-            <CardBody className="space-y-3">
-              <div className="flex items-start gap-2.5">
-                <span className="mt-[1px] flex h-6 w-6 shrink-0 items-center justify-center rounded-[7px] border border-line-soft bg-[#171d25] text-muted">
-                  <Info size={13} />
-                </span>
-                <div>
-                  <h3 className="text-[12.5px] font-semibold text-ink">{t("home.playUnavailable.title")}</h3>
-                  <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
-                    {t("home.playUnavailable.body")}
-                  </p>
+            <CardHeader title={t("home.card.environment")} icon={<Monitor size={13} />} />
+            <CardBody className="pt-3">
+              {!summary ? (
+                <SkeletonRows rows={5} />
+              ) : (
+                <div className="divide-y divide-line-soft">
+                  <KeyValue
+                    label={summary.environment.osName || "Windows"}
+                    value={`${summary.environment.osVersion} · ${summary.environment.osBuild}`}
+                    mono
+                  />
+                  <KeyValue
+                    label={
+                      <span className="flex items-center gap-1.5">
+                        <Cpu size={11} />
+                        {t("home.label.cores", { count: summary.environment.cpuCores })}
+                      </span>
+                    }
+                    value={summary.environment.cpuName}
+                    title={summary.environment.cpuName}
+                  />
+                  <KeyValue
+                    label={
+                      <span className="flex items-center gap-1.5">
+                        <MemoryStick size={11} />
+                        RAM
+                      </span>
+                    }
+                    value={`${Math.round(summary.environment.memoryAvailableMb / 1024)} / ${Math.round(summary.environment.memoryTotalMb / 1024)} GB`}
+                    mono
+                  />
+                  <KeyValue
+                    label={t("home.label.longPaths")}
+                    value={
+                      summary.environment.longPaths === null
+                        ? t("common.unknown")
+                        : summary.environment.longPaths
+                          ? t("common.ok")
+                          : t("common.warning")
+                    }
+                  />
+                  <KeyValue
+                    label={t("home.label.freeSpace")}
+                    value={
+                      summary.disks.length === 0
+                        ? "—"
+                        : summary.disks
+                            .map((disk) => `${gib(disk.freeBytes)} ${disk.volume}`)
+                            .join(" · ")
+                    }
+                    mono
+                  />
                 </div>
-              </div>
-              <div className="divider" />
-              <div className="grid grid-cols-2 gap-2">
-                <Button size="sm" icon={<ShieldCheck size={13} />} onClick={() => setPage("updates")}>
-                  {t("nav.updates")}
-                </Button>
-                <Button size="sm" icon={<PackageCheck size={13} />} onClick={() => setPage("diagnostics")}>
-                  {t("nav.diagnostics")}
-                </Button>
-              </div>
-              {installation?.restorePoint ? (
-                <InlineNote tone="warn">
-                  {t("updates.restore.hint")}
-                </InlineNote>
-              ) : null}
+              )}
             </CardBody>
           </Card>
+
+          <div className="border-l-2 border-line pl-3.5">
+            <h3 className="text-[12.5px] font-medium text-ink">{t("home.playUnavailable.title")}</h3>
+            <p className="mt-1 text-[11.5px] leading-[1.6] text-muted">
+              {t("home.playUnavailable.body")}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+              <button
+                type="button"
+                onClick={() => setPage("updates")}
+                className="focus-ring rounded-[2px] text-[11.5px] text-muted transition-colors hover:text-ink"
+              >
+                {t("nav.updates")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage("diagnostics")}
+                className="focus-ring rounded-[2px] text-[11.5px] text-muted transition-colors hover:text-ink"
+              >
+                {t("nav.diagnostics")}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -7,17 +7,17 @@ type Size = "sm" | "md";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-accent text-[#0B0D10] hover:bg-[#a3b9ff] active:bg-[#7f9df8] shadow-[0_1px_0_rgb(255_255_255/0.25)_inset,0_2px_8px_rgb(142_169_255/0.18)]",
+    "bg-ink text-base hover:bg-[#fbf7f0] active:bg-[#ddd6cc] disabled:hover:bg-ink",
   secondary:
-    "bg-raised text-ink border border-line hover:border-[#333d4c] hover:bg-[#202834] active:bg-[#1d242e]",
-  ghost: "text-muted hover:text-ink hover:bg-[#1b222b] active:bg-[#202834]",
+    "border border-line bg-transparent text-ink hover:border-[#423d35] hover:bg-raised active:bg-[#26231f]",
+  ghost: "text-muted hover:bg-raised hover:text-ink active:bg-[#26231f]",
   danger:
-    "bg-[#2a1c1e] text-danger border border-[#4a2b2d] hover:bg-[#342225] hover:border-[#5c3437]",
+    "border border-[#4a312e] bg-[#241a18] text-danger hover:border-[#603a35] hover:bg-[#2d201e]",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-2.5 text-[12px] gap-1.5 rounded-[7px]",
-  md: "h-9 px-3.5 text-[13px] gap-2 rounded-[var(--radius-control)]",
+  sm: "h-7 gap-1.5 rounded-[7px] px-2.5 text-[12px]",
+  md: "h-8 gap-2 rounded-[var(--radius-control)] px-3 text-[12.5px]",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -45,7 +45,7 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        "focus-ring inline-flex select-none items-center justify-center font-medium whitespace-nowrap transition-[background,border-color,color,opacity] duration-150",
+        "focus-ring inline-flex select-none items-center justify-center font-medium whitespace-nowrap transition-[background-color,border-color,color,opacity] duration-150",
         "disabled:cursor-not-allowed disabled:opacity-45",
         variants[variant],
         sizes[size],
@@ -72,8 +72,8 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "focus-ring inline-flex h-7 w-7 items-center justify-center rounded-[7px] text-muted transition-colors",
-        "hover:bg-[#1f27310f] hover:text-ink disabled:cursor-not-allowed disabled:opacity-40",
+        "focus-ring inline-flex h-7 w-7 items-center justify-center rounded-[6px] text-muted transition-colors",
+        "hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:opacity-40",
         className,
       )}
       {...rest}

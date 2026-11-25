@@ -16,7 +16,7 @@ import { useApp } from "@/state/AppContext";
 import { useT } from "@/i18n";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardBody, CardFooter, CardHeader } from "@/components/ui/Card";
-import { Badge, Pill } from "@/components/ui/Badge";
+import { Pill } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, Field, Segmented, Toggle } from "@/components/ui/Field";
 import { EmptyState, InlineNote, KeyValue } from "@/components/ui/EmptyState";
@@ -180,17 +180,6 @@ export function BuildPage() {
     }
   }, [buildJob.status, t]);
 
-  const statusTone =
-    buildJob.status === "succeeded"
-      ? "ok"
-      : buildJob.status === "failed"
-        ? "danger"
-        : buildJob.status === "cancelled"
-          ? "warn"
-          : buildJob.status === "idle"
-            ? "neutral"
-            : "accent";
-
   return (
     <div className="animate-fade-in">
       <PageHeader
@@ -257,7 +246,7 @@ export function BuildPage() {
           />
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
           <div className="space-y-4">
             <Card>
               <CardHeader
@@ -358,7 +347,7 @@ export function BuildPage() {
             <Card>
               <CardHeader title={t("build.paths.title")} icon={<FolderOpen size={13} />} />
               <CardBody className="pt-2">
-                <div className="divide-y divide-[#1d242d]">
+                <div className="divide-y divide-line-soft">
                   <KeyValue label={t("build.paths.output")} value={settings?.outPath ?? "—"} mono title={settings?.outPath} />
                   <KeyValue label={t("build.paths.work")} value={settings?.workPath ?? "—"} mono title={settings?.workPath} />
                   <KeyValue label={t("home.label.game")} value={settings?.gamePath ?? t("home.noGame")} mono title={settings?.gamePath ?? undefined} />
@@ -369,16 +358,12 @@ export function BuildPage() {
 
           <div className="space-y-4">
             <Card>
-              <CardHeader
-                title={statusLabel}
-                icon={<Hammer size={13} />}
-                action={<Badge tone={statusTone}>{buildJob.status}</Badge>}
-              />
+              <CardHeader title={statusLabel} icon={<Hammer size={13} />} />
               <CardBody className="space-y-3 pt-3">
                 <Progress
                   value={buildJob.percent}
                   tone={buildJob.status === "failed" ? "danger" : buildJob.status === "succeeded" ? "ok" : "accent"}
-                  height="h-2"
+                  height="h-1.5"
                 />
                 <div className="flex items-center justify-between text-[11.5px]">
                   <span className="truncate text-muted">
@@ -392,26 +377,26 @@ export function BuildPage() {
                         : t("build.status.idle")}
                   </span>
                   <span className="shrink-0 font-mono text-[11px] text-faint">
-                    {percentLabel(buildJob.percent) ?? t("build.progress.noEta")}
+                    {percentLabel(buildJob.percent) ?? "—"}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-[8px] border border-line-soft bg-[#11161c] px-2.5 py-2">
+                <div className="grid grid-cols-3 gap-4 border-t border-line-soft pt-2.5">
+                  <div>
                     <div className="label-xs">{t("common.time")}</div>
-                    <div className="mt-0.5 font-mono text-[11.5px] text-ink">
+                    <div className="num mt-0.5 text-[13px] text-ink">
                       {elapsedLabel(buildJob.startedAt, buildJob.finishedAt, now)}
                     </div>
                   </div>
-                  <div className="rounded-[8px] border border-line-soft bg-[#11161c] px-2.5 py-2">
+                  <div>
                     <div className="label-xs">ETA</div>
-                    <div className="mt-0.5 truncate font-mono text-[11.5px] text-ink">
+                    <div className="num mt-0.5 truncate text-[13px] text-ink">
                       {buildJob.eta ? etaLabel(buildJob.eta) : "—"}
                     </div>
                   </div>
-                  <div className="rounded-[8px] border border-line-soft bg-[#11161c] px-2.5 py-2">
+                  <div>
                     <div className="label-xs">{t("build.stages.title")}</div>
-                    <div className="mt-0.5 font-mono text-[11.5px] text-ink">
+                    <div className="num mt-0.5 text-[13px] text-ink">
                       {buildJob.stageCount > 0
                         ? `${Math.min(buildJob.stageIndex + 1, buildJob.stageCount)}/${buildJob.stageCount}`
                         : "—"}

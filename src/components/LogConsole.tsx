@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "react";
-import { Copy, Terminal } from "lucide-react";
+import { Copy } from "lucide-react";
 import { useT } from "@/i18n";
 import { writeClipboard } from "@/lib/tauri";
 import { cn } from "@/lib/format";
 import { IconButton } from "./ui/Button";
-import { EmptyState } from "./ui/EmptyState";
 
 function classify(line: string): string {
   const lower = line.toLowerCase();
@@ -45,10 +44,9 @@ export function LogConsole({
   }, [lines]);
 
   return (
-    <div className={cn("overflow-hidden rounded-[10px] border border-line-soft bg-[#090c10]", className)}>
-      <div className="flex items-center justify-between gap-2 border-b border-line-soft bg-[#0d1116] px-3 py-1.5">
-        <span className="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.05em] text-faint">
-          <Terminal size={11} />
+    <div className={cn("overflow-hidden rounded-[8px] border border-line-soft bg-console", className)}>
+      <div className="flex items-center justify-between gap-2 border-b border-line-soft px-3 py-1.5">
+        <span className="truncate text-[11px] font-medium text-muted">
           {title ?? t("build.log.title")}
         </span>
         {copyable && lines.length > 0 ? (
@@ -67,11 +65,13 @@ export function LogConsole({
           const element = event.currentTarget;
           pinned.current = element.scrollHeight - element.scrollTop - element.clientHeight < 40;
         }}
-        className="scroll-thin overflow-auto p-2.5"
+        className="scroll-thin overflow-auto p-3"
         style={{ maxHeight }}
       >
         {lines.length === 0 ? (
-          <EmptyState compact title={emptyText ?? t("build.log.empty")} />
+          <p className="py-4 text-[11.5px] leading-[1.6] text-faint">
+            {emptyText ?? t("build.log.empty")}
+          </p>
         ) : (
           <div className="log">
             {lines.map((line, index) => (

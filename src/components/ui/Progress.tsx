@@ -4,7 +4,7 @@ export function Progress({
   value,
   tone = "accent",
   className,
-  height = "h-1.5",
+  height = "h-1",
 }: {
   value: number | null;
   tone?: "accent" | "ok" | "warn" | "danger";
@@ -22,17 +22,17 @@ export function Progress({
 
   return (
     <div
-      className={cn("relative w-full overflow-hidden rounded-full bg-[#20272f]", height, className)}
+      className={cn("relative w-full overflow-hidden rounded-[2px] bg-line-soft", height, className)}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={clamped === null ? undefined : Math.round(clamped)}
     >
       {clamped === null ? (
-        <div className={cn("h-full w-2/5 rounded-full animate-indeterminate", filled)} />
+        <div className={cn("h-full w-2/5 rounded-[2px] animate-indeterminate", filled)} />
       ) : (
         <div
-          className={cn("h-full rounded-full transition-[width] duration-300 ease-out", filled)}
+          className={cn("h-full rounded-[2px] transition-[width] duration-300 ease-out", filled)}
           style={{ width: `${clamped}%` }}
         />
       )}
@@ -41,7 +41,7 @@ export function Progress({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("shimmer rounded-[6px] bg-[#1a212a]", className)} />;
+  return <div className={cn("rounded-[4px] bg-raised", className)} />;
 }
 
 export function SkeletonRows({ rows = 3 }: { rows?: number }) {

@@ -6,10 +6,8 @@ import {
   Languages,
   RefreshCw,
   RotateCcw,
-  Save,
   Settings2,
   SlidersHorizontal,
-  Sparkles,
   TriangleExclamationPoint,
 } from "lucide-react";
 import type { Settings } from "@/types";
@@ -166,8 +164,7 @@ export function SettingsPage() {
         title={t("settings.heading")}
         subtitle={t("settings.subheading")}
         actions={
-          <Badge tone={saving ? "accent" : "neutral"}>
-            <Save size={11} />
+          <Badge tone={saving ? "accent" : "ok"}>
             {saving ? t("common.saving") : t("common.saved")}
           </Badge>
         }
@@ -179,7 +176,6 @@ export function SettingsPage() {
             <CardHeader
               title={t("settings.group.general")}
               icon={<Languages size={13} />}
-              description={`${t("settings.language")} · ${t("settings.launchOnStartup")}`}
             />
             <CardBody className="space-y-3 pt-3">
               <Field label={t("settings.language")}>
@@ -214,7 +210,6 @@ export function SettingsPage() {
             <CardHeader
               title={t("nav.updates")}
               icon={<RefreshCw size={13} />}
-              description={t("updates.subheading")}
             />
             <CardBody className="space-y-3 pt-3">
               <Toggle
@@ -394,7 +389,7 @@ export function SettingsPage() {
         <Card>
           <CardHeader
             title={t("settings.updater.heading")}
-            icon={<Sparkles size={13} />}
+            icon={<Download size={13} />}
             description={
               metadata?.updaterConfigured
                 ? t("settings.updater.configured")
@@ -447,7 +442,7 @@ export function SettingsPage() {
                 </div>
 
                 {launcherRelease?.notes ? (
-                  <pre className="log scroll-thin max-h-40 overflow-auto rounded-[8px] border border-line-soft bg-[#090c10] p-2.5">
+                  <pre className="log scroll-thin max-h-40 overflow-auto rounded-[8px] border border-line-soft bg-console p-2.5">
                     {launcherRelease.notes}
                   </pre>
                 ) : null}

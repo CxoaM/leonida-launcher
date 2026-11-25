@@ -6,6 +6,7 @@ import {
   FolderSearch,
   Gamepad2,
   HardDriveDownload,
+  Monitor,
   RefreshCw,
   TriangleExclamationPoint as AlertTriangle,
   Wrench,
@@ -18,7 +19,7 @@ import { useT } from "@/i18n";
 import type { MessageKey } from "@/i18n/dictionary";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardBody, CardFooter, CardHeader } from "@/components/ui/Card";
-import { Badge, Dot, Pill } from "@/components/ui/Badge";
+import { Badge, Pill } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, Field, PathField } from "@/components/ui/Field";
 import { InlineNote, KeyValue } from "@/components/ui/EmptyState";
@@ -259,7 +260,7 @@ export function InstallationPage() {
       ) : null}
 
       {installed ? (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           <Card>
             <CardHeader
               title={t("install.installed.title")}
@@ -268,7 +269,7 @@ export function InstallationPage() {
               action={<Badge tone={compatibilityTone(compatibilityStatus)}>{t(`compat.${compatibilityStatus}` as MessageKey)}</Badge>}
             />
             <CardBody className="pt-2">
-              <div className="divide-y divide-[#1d242d]">
+              <div className="divide-y divide-line-soft">
                 <KeyValue
                   label={t("install.form.repository")}
                   value={installation?.repositoryPath ?? "—"}
@@ -302,7 +303,6 @@ export function InstallationPage() {
                       : t("home.clean")
                   }
                 />
-                <KeyValue label={t("home.label.submodules")} value={installation?.submodulesReady ? t("common.ok") : t("home.submodulesMissing")} />
                 <KeyValue
                   label={t("home.label.game")}
                   value={installation?.gamePath ?? t("home.noGame")}
@@ -312,18 +312,21 @@ export function InstallationPage() {
               </div>
 
               {installation?.submodules.length ? (
-                <div className="mt-3 space-y-1.5">
-                  {installation.submodules.map((submodule) => (
-                    <div
-                      key={submodule.path}
-                      className="flex items-center justify-between gap-3 rounded-[7px] border border-line-soft bg-[#11161c] px-2.5 py-1.5"
-                    >
-                      <span className="truncate font-mono text-[11px] text-muted">{submodule.path}</span>
-                      <Badge tone={submodule.initialized ? "ok" : "warn"}>
-                        {submodule.initialized ? t("common.ok") : t("home.submodulesMissing")}
-                      </Badge>
-                    </div>
-                  ))}
+                <div className="mt-3">
+                  <div className="label-xs mb-1">{t("home.label.submodules")}</div>
+                  <ul className="divide-y divide-line-soft">
+                    {installation.submodules.map((submodule) => (
+                      <li
+                        key={submodule.path}
+                        className="flex items-center justify-between gap-3 py-1.5"
+                      >
+                        <span className="truncate font-mono text-[11px] text-muted">{submodule.path}</span>
+                        <Badge tone={submodule.initialized ? "ok" : "warn"}>
+                          {submodule.initialized ? t("common.ok") : t("home.submodulesMissing")}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ) : null}
             </CardBody>
@@ -334,11 +337,22 @@ export function InstallationPage() {
               <CardHeader title={t("install.review.title")} icon={<HardDriveDownload size={13} />} />
               <CardBody className="space-y-2 pt-3">
                 <Progress
+                  tone={
+                    installJob.status === "failed"
+                      ? "danger"
+                      : installJob.status === "cancelled"
+                        ? "warn"
+                        : installJob.status === "succeeded"
+                          ? "ok"
+                          : "accent"
+                  }
                   value={installJob.percent ?? (running ? null : installJob.status === "succeeded" ? 100 : 0)}
                 />
                 <div className="flex items-center justify-between text-[11.5px] text-muted">
                   <span>{installJob.currentStage ?? t("build.status.idle")}</span>
-                  <span className="font-mono text-faint">{running ? t("status.busy") : installJob.status}</span>
+                  <span className="font-mono text-[10.5px] text-faint">
+                    {t(`job.status.${installJob.status}` as MessageKey)}
+                  </span>
                 </div>
                 <StepList steps={stepList} className="pt-2" />
                 {installJob.error ? (
@@ -350,7 +364,7 @@ export function InstallationPage() {
             <Card>
               <CardHeader title={t("build.paths.title")} icon={<FolderOpen size={13} />} />
               <CardBody className="pt-2">
-                <div className="divide-y divide-[#1d242d]">
+                <div className="divide-y divide-line-soft">
                   <KeyValue label={t("build.paths.output")} value={settings?.outPath ?? "—"} mono title={settings?.outPath} />
                   <KeyValue label={t("build.paths.work")} value={settings?.workPath ?? "—"} mono title={settings?.workPath} />
                   <KeyValue
@@ -371,7 +385,7 @@ export function InstallationPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <div className="space-y-4">
             <Card>
               <CardHeader title={t("install.form.title")} icon={<HardDriveDownload size={13} />} />
@@ -411,7 +425,7 @@ export function InstallationPage() {
                         key={candidate.path}
                         type="button"
                         onClick={() => setGamePath(candidate.path)}
-                        className="flex w-full items-center justify-between gap-3 rounded-[8px] border border-line-soft bg-[#11161c] px-2.5 py-2 text-left transition-colors hover:border-accent/35 hover:bg-[#141a22]"
+                        className="flex w-full items-center justify-between gap-3 rounded-[6px] border border-line-soft bg-base-soft px-3 py-2 text-left transition-colors hover:border-line hover:bg-raised"
                       >
                         <span className="min-w-0">
                           <span className="block truncate font-mono text-[11px] text-ink">{candidate.path}</span>
@@ -515,7 +529,7 @@ export function InstallationPage() {
             <Card>
               <CardHeader title={t("install.review.title")} icon={<CheckCircle2 size={13} />} />
               <CardBody className="space-y-3">
-                <div className="divide-y divide-[#1d242d]">
+                <div className="divide-y divide-line-soft">
                   <KeyValue label={t("install.form.out")} value={outPath || "—"} mono title={outPath} />
                   <KeyValue label={t("install.form.work")} value={workPath || "—"} mono title={workPath} />
                   <KeyValue
@@ -534,9 +548,9 @@ export function InstallationPage() {
             </Card>
 
             <Card>
-              <CardHeader title={t("home.card.environment")} icon={<Dot tone="accent" />} />
+              <CardHeader title={t("home.card.environment")} icon={<Monitor size={13} />} />
               <CardBody className="pt-2">
-                <div className="divide-y divide-[#1d242d]">
+                <div className="divide-y divide-line-soft">
                   <KeyValue label={t("common.version")} value={summary?.metadata.version ?? "—"} mono />
                   <KeyValue
                     label="Windows"

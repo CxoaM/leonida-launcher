@@ -338,70 +338,67 @@ export function DiagnosticsPage() {
       />
 
       <div className="space-y-4">
-        <Card className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_150%_at_0%_0%,rgba(142,169,255,0.08),transparent_58%)]"
-          />
-          <CardBody className="relative px-5 py-4">
-            {running && !report ? (
-              <SkeletonRows rows={2} />
-            ) : report ? (
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <span className="flex items-center gap-2">
-                    <Dot tone={overallTone} pulse={overallTone === "ok"} />
-                    <span className="label-xs">{t("diag.heading")}</span>
+        <section className="pb-1">
+          {running && !report ? (
+            <SkeletonRows rows={2} />
+          ) : report ? (
+            <div className="flex flex-wrap items-start justify-between gap-6">
+              <div className="min-w-0 max-w-[72ch]">
+                <span className="flex items-center gap-2">
+                  <Dot tone={overallTone} />
+                  <span className="font-mono text-[10.5px] text-faint">
+                    {localTime(report.runAt, locale)}
                   </span>
-                  <h2 className="mt-2 text-[16px] font-semibold tracking-[-0.015em] text-ink">
-                    {t(overallKey)}
-                  </h2>
-                  <p className="mt-1 max-w-[70ch] text-[12px] leading-[1.5] text-muted">
-                    {report.environment.osName} {report.environment.osVersion} (build{" "}
-                    {report.environment.osBuild}) · {report.environment.cpuCores} cores ·{" "}
-                    {Math.round(report.environment.memoryTotalMb / 1024)} GB RAM
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <Pill>{localTime(report.runAt, locale)}</Pill>
-                  {problems > 0 ? (
-                    <Badge tone="danger">{`${problems} × ${t("diag.item.error")}`}</Badge>
-                  ) : null}
-                  {warnings > 0 ? (
-                    <Badge tone="warn">{`${warnings} × ${t("diag.item.warning")}`}</Badge>
-                  ) : null}
-                  <Pill>{`v${report.environment.launcherVersion}`}</Pill>
-                </div>
+                </span>
+                <h2 className="display mt-1.5 text-[22px] leading-[1.2] text-ink">{t(overallKey)}</h2>
+                <p className="mt-1 text-[12.5px] leading-[1.6] text-muted">
+                  {report.environment.osName} {report.environment.osVersion} (build{" "}
+                  {report.environment.osBuild}) · {report.environment.cpuCores} cores ·{" "}
+                  {Math.round(report.environment.memoryTotalMb / 1024)} GB RAM
+                </p>
+                {problems > 0 || warnings > 0 ? (
+                  <div className="mt-2 flex flex-wrap items-center gap-4">
+                    {problems > 0 ? (
+                      <Badge tone="danger">{`${problems} × ${t("diag.item.error")}`}</Badge>
+                    ) : null}
+                    {warnings > 0 ? (
+                      <Badge tone="warn">{`${warnings} × ${t("diag.item.warning")}`}</Badge>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-            ) : (
-              <EmptyState
-                compact
-                icon={<TriangleExclamationPoint size={15} />}
-                title={t("diag.notRun")}
-                action={
-                  <Button size="sm" variant="primary" onClick={() => void run(true)}>
-                    {t("diag.action.run")}
-                  </Button>
-                }
-              />
-            )}
-          </CardBody>
-        </Card>
+              <span className="shrink-0 font-mono text-[10.5px] text-faint">
+                {t("home.label.launcher")} {report.environment.launcherVersion}
+              </span>
+            </div>
+          ) : (
+            <EmptyState
+              compact
+              icon={<TriangleExclamationPoint size={15} />}
+              title={t("diag.notRun")}
+              action={
+                <Button size="sm" variant="primary" onClick={() => void run(true)}>
+                  {t("diag.action.run")}
+                </Button>
+              }
+            />
+          )}
+        </section>
 
         {report ? (
           <>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="columns-1 gap-4 lg:columns-2">
               {groups.map(([group, items]) => {
                 const key = groupTitle(group);
                 return (
-                  <Card key={group}>
+                  <Card key={group} className="mb-4 break-inside-avoid">
                     <CardHeader
                       title={key ? t(key) : humanizeGroup(group)}
                       icon={groupIcon(group)}
                       action={<Pill>{`${items.length}`}</Pill>}
                     />
                     <CardBody className="pt-1.5">
-                      <ul className="divide-y divide-[#1d242d]">
+                      <ul className="divide-y divide-line-soft">
                         {items.map((item) => (
                           <li key={item.id} className="py-2">
                             <div className="flex items-start justify-between gap-3">
@@ -451,7 +448,7 @@ export function DiagnosticsPage() {
                 {dependencies.length === 0 ? (
                   <EmptyState compact title={t("diag.notRun")} />
                 ) : (
-                  <ul className="divide-y divide-[#1d242d]">
+                  <ul className="divide-y divide-line-soft">
                     {dependencies.map((dependency) => {
                       const runningThis = isJobRunning(dependencyJob.status) && installing === dependency.id;
                       return (
@@ -462,7 +459,7 @@ export function DiagnosticsPage() {
                               <Badge tone={dependencyTone(dependency.status)}>
                                 {t(dependencyStatusLabel[dependency.status])}
                               </Badge>
-                              <span className="text-[10.5px] uppercase tracking-[0.04em] text-faint">
+                              <span className="text-[11px] text-faint">
                                 {t(dependencyKindLabel[dependency.kind])}
                               </span>
                               {dependency.version ? (
@@ -519,7 +516,7 @@ export function DiagnosticsPage() {
                   </ul>
                 )}
                 {isJobRunning(dependencyJob.status) ? (
-                  <div className="mt-3 space-y-1.5 rounded-[10px] border border-line-soft bg-[#0d1116] p-3">
+                  <div className="mt-3 space-y-1.5 rounded-[10px] border border-line-soft bg-console p-3">
                     <div className="flex items-center justify-between text-[11.5px] text-muted">
                       <span className="flex items-center gap-1.5">
                         <LoaderCircle size={12} className="animate-spin text-accent" />
@@ -541,21 +538,38 @@ export function DiagnosticsPage() {
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Card>
-                <CardHeader title={t("diag.groups.storage")} icon={<HardDrive size={13} />} />
+                <CardHeader title={t("diag.disk.title")} icon={<HardDrive size={13} />} />
                 <CardBody className="pt-2">
                   {report.disks.length === 0 ? (
                     <EmptyState compact title={t("common.notAvailable")} />
                   ) : (
-                    <div className="divide-y divide-[#1d242d]">
-                      {report.disks.map((disk) => (
-                        <KeyValue
-                          key={`${disk.volume}-${disk.path}`}
-                          label={disk.volume}
-                          value={`${gib(disk.freeBytes)} / ${gib(disk.totalBytes)}`}
-                          mono
-                          title={disk.path}
-                        />
-                      ))}
+                    <div className="divide-y divide-line-soft">
+                      {report.disks.map((disk) => {
+                        const used = Math.max(0, disk.totalBytes - disk.freeBytes);
+                        const ratio =
+                          disk.totalBytes > 0 ? Math.min(100, (used / disk.totalBytes) * 100) : 0;
+                        return (
+                          <div key={`${disk.volume}-${disk.path}`} className="py-2">
+                            <div className="flex items-baseline justify-between gap-4">
+                              <span className="font-mono text-[11.5px] text-ink" title={disk.path}>
+                                {disk.volume}
+                              </span>
+                              <span className="font-mono text-[11px] text-muted">
+                                {gib(disk.freeBytes)} free / {gib(disk.totalBytes)}
+                              </span>
+                            </div>
+                            <div
+                              aria-hidden
+                              className="mt-1.5 h-1 w-full overflow-hidden rounded-[1px] bg-line-soft"
+                            >
+                              <div
+                                className="h-full bg-muted/35"
+                                style={{ width: `${ratio.toFixed(1)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                   <div className="divider my-3" />
@@ -590,7 +604,7 @@ export function DiagnosticsPage() {
               </Card>
 
               <Card>
-                <CardHeader title={t("diag.groups.network")} icon={<Globe size={13} />} />
+                <CardHeader title={t("diag.machine.title")} icon={<Globe size={13} />} />
                 <CardBody className="pt-2">
                   <div className="flex items-center justify-between gap-3">
                     <span className="flex items-center gap-2 text-[12.5px] text-ink">
@@ -613,7 +627,7 @@ export function DiagnosticsPage() {
                       mono
                     />
                     <KeyValue
-                      label="Long paths"
+                      label={t("home.label.longPaths")}
                       value={
                         report.environment.longPaths === null
                           ? t("common.unknown")
@@ -658,7 +672,7 @@ export function DiagnosticsPage() {
             {logs.length === 0 ? (
               <EmptyState compact title={t("diag.logs.empty")} />
             ) : (
-              <ul className="divide-y divide-[#1d242d]">
+              <ul className="divide-y divide-line-soft">
                 {logs.map((file) => (
                   <li key={file.name} className="py-1.5">
                     <div className="flex items-center justify-between gap-3">
@@ -686,7 +700,7 @@ export function DiagnosticsPage() {
                       </span>
                     </div>
                     {openLog === file.name && !logLoading ? (
-                      <pre className="log scroll-thin mt-2 max-h-72 overflow-auto rounded-[8px] border border-line-soft bg-[#090c10] p-2.5">
+                      <pre className="log scroll-thin mt-2 max-h-72 overflow-auto rounded-[8px] border border-line-soft bg-console p-2.5">
                         {logDetail || t("diag.logs.empty")}
                       </pre>
                     ) : null}

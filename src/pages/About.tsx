@@ -3,7 +3,7 @@ import { useApp } from "@/state/AppContext";
 import { useT } from "@/i18n";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Badge, Pill } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/Badge";
 import { Button, IconButton } from "@/components/ui/Button";
 import { InlineNote, KeyValue } from "@/components/ui/EmptyState";
 import { TriangleExclamationPoint } from "lucide-react";
@@ -61,34 +61,23 @@ export function AboutPage() {
       />
 
       <div className="space-y-4">
-        <Card className="relative">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_150%_at_100%_0%,rgba(142,169,255,0.10),transparent_60%)]"
-          />
-          <CardBody className="relative flex flex-wrap items-start justify-between gap-5 px-5 py-4.5">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-accent-line bg-accent-soft text-accent">
-                  <GitBranch size={17} strokeWidth={1.9} />
-                </span>
-                <div>
-                  <h2 className="text-[15px] font-semibold tracking-[-0.015em] text-ink">
-                    {metadata?.productName ?? t("app.name")}
-                  </h2>
-                  <p className="text-[11.5px] text-muted">{t("app.tagline")}</p>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                <Pill>{`v${metadata?.version ?? environment?.launcherVersion ?? "—"}`}</Pill>
-                <Pill>{metadata?.channel ?? "stable"}</Pill>
-                <Pill>{metadata?.license ?? "MIT"}</Pill>
+        <Card>
+          <CardBody className="flex flex-wrap items-start justify-between gap-6 px-5 py-4">
+            <div className="min-w-0 max-w-[54ch]">
+              <h2 className="display text-[21px] leading-[1.2] text-ink">
+                {metadata?.productName ?? t("app.name")}
+              </h2>
+              <p className="mt-1 text-[12px] leading-[1.55] text-muted">{t("app.tagline")}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10.5px] text-faint">
+                <span>v{metadata?.version ?? environment?.launcherVersion ?? "—"}</span>
+                <span>{metadata?.channel ?? "stable"}</span>
+                <span>{metadata?.license ?? "MIT"}</span>
                 <Badge tone={published ? "ok" : "warn"}>
                   {published ? t("common.ok") : t("common.warning")}
                 </Badge>
               </div>
             </div>
-            <div className="grid min-w-[240px] grid-cols-1 gap-x-6">
+            <div className="grid min-w-[260px] grid-cols-1 gap-x-6">
               <KeyValue label={t("about.identifier")} value={metadata?.identifier ?? "—"} mono />
               <KeyValue
                 label={t("about.license")}
@@ -116,7 +105,7 @@ export function AboutPage() {
           </InlineNote>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
           <Card>
             <CardHeader title={t("about.repository")} icon={<GitBranch size={13} />} />
             <CardBody className="space-y-3 pt-3">
@@ -151,9 +140,6 @@ export function AboutPage() {
                   </Button>
                 ) : null}
               </div>
-              <InlineNote tone="neutral" icon={<ShieldCheck size={13} />}>
-                {t("about.credits.body")}
-              </InlineNote>
             </CardBody>
           </Card>
 
@@ -184,7 +170,7 @@ export function AboutPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_1fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.15fr_1fr]">
           <Card>
             <CardHeader title={t("about.disclaimer.title")} icon={<ShieldCheck size={13} />} />
             <CardBody className="pt-3">

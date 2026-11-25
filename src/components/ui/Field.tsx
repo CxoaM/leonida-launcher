@@ -28,7 +28,7 @@ export function Field({
         <label
           htmlFor={htmlFor}
           className={cn(
-            "text-[12.5px] font-medium text-ink",
+            "text-[12px] font-medium text-ink",
             tone === "danger" && "text-danger",
             tone === "warn" && "text-warn",
           )}
@@ -38,7 +38,7 @@ export function Field({
         {action}
       </div>
       {children}
-      {hint ? <p className="text-[11.5px] leading-[1.45] text-faint">{hint}</p> : null}
+      {hint ? <p className="text-[11.5px] leading-[1.5] text-faint">{hint}</p> : null}
     </div>
   );
 }
@@ -57,11 +57,11 @@ export function Toggle({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-6 py-3">
+    <div className="flex items-start justify-between gap-6 py-2.5">
       <div className="min-w-0">
-        <div className="text-[12.5px] font-medium text-ink">{label}</div>
+        <div className="text-[12.5px] text-ink">{label}</div>
         {description ? (
-          <p className="mt-0.5 max-w-[52ch] text-[11.5px] leading-[1.45] text-faint">{description}</p>
+          <p className="mt-0.5 max-w-[56ch] text-[11.5px] leading-[1.5] text-faint">{description}</p>
         ) : null}
       </div>
       <button
@@ -72,15 +72,15 @@ export function Toggle({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          "focus-ring relative h-[22px] w-[38px] shrink-0 rounded-full border transition-colors duration-150",
-          checked ? "border-accent/50 bg-accent/85" : "border-line bg-[#232b35]",
+          "focus-ring relative mt-0.5 h-5 w-9 shrink-0 rounded-full border transition-colors duration-150",
+          checked ? "border-accent bg-accent" : "border-line bg-raised",
           disabled && "cursor-not-allowed opacity-45",
         )}
       >
         <span
           className={cn(
-            "absolute top-[2px] h-[16px] w-[16px] rounded-full bg-[#0b0d10] shadow-sm transition-all duration-150",
-            checked ? "left-[19px] bg-[#0b0d10]" : "left-[2px] bg-[#8d97a5]",
+            "absolute top-[2px] h-3.5 w-3.5 rounded-full transition-[left,background-color] duration-150",
+            checked ? "left-[18px] bg-[#1b130e]" : "left-[2px] bg-[#8a8277]",
           )}
         />
       </button>
@@ -108,8 +108,8 @@ export function Checkbox({
     <label
       htmlFor={id}
       className={cn(
-        "flex cursor-pointer items-start gap-3 rounded-[10px] border px-3 py-2.5 transition-colors",
-        checked ? "border-accent/35 bg-[#141a22]" : "border-line-soft bg-[#11161c] hover:border-line",
+        "flex cursor-pointer items-start gap-3 rounded-[6px] px-2 py-2 transition-colors hover:bg-raised/50",
+        checked && "bg-raised/40",
         disabled && "cursor-not-allowed opacity-60",
       )}
     >
@@ -124,8 +124,8 @@ export function Checkbox({
       <span
         aria-hidden
         className={cn(
-          "mt-[1px] flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-[4px] border transition-colors",
-          checked ? "border-accent bg-accent text-[#0b0d10]" : "border-[#39424f] bg-[#0d1116]",
+          "mt-[1px] flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
+          checked ? "border-accent bg-accent text-[#1b130e]" : "border-line bg-base",
         )}
       >
         {checked ? (
@@ -142,11 +142,11 @@ export function Checkbox({
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center justify-between gap-3">
-          <span className="text-[12.5px] font-medium text-ink">{label}</span>
+          <span className="text-[12.5px] text-ink">{label}</span>
           {meta}
         </span>
         {description ? (
-          <span className="mt-0.5 block text-[11.5px] leading-[1.45] text-faint">{description}</span>
+          <span className="mt-0.5 block text-[11.5px] leading-[1.5] text-faint">{description}</span>
         ) : null}
       </span>
     </label>
@@ -167,7 +167,7 @@ export function Segmented<T extends string>({
   return (
     <div
       className={cn(
-        "inline-flex rounded-[9px] border border-line bg-[#0d1116] p-[3px]",
+        "inline-flex rounded-[var(--radius-control)] border border-line bg-base-soft p-[2px]",
         disabled && "opacity-50",
       )}
       role="radiogroup"
@@ -181,9 +181,9 @@ export function Segmented<T extends string>({
           disabled={disabled}
           onClick={() => onChange(option.value)}
           className={cn(
-            "focus-ring rounded-[6px] px-2.5 py-1 text-[12px] font-medium transition-colors",
+            "focus-ring rounded-[6px] px-2.5 py-1 text-[12px] transition-colors",
             option.value === value
-              ? "bg-[#252e3a] text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]"
+              ? "bg-raised text-ink"
               : "text-muted hover:text-ink",
           )}
         >
@@ -275,7 +275,7 @@ export function PathField({
             label={t("common.open")}
             disabled={!value}
             onClick={() => void revealPath(value)}
-            className="h-9 w-9 rounded-[var(--radius-control)] border border-line bg-[#0d1116]"
+            className="h-8 w-8 rounded-[var(--radius-control)] border border-line bg-base-soft"
           >
             <Eye size={14} />
           </IconButton>
@@ -284,12 +284,12 @@ export function PathField({
           label={t("common.browse")}
           disabled={disabled}
           onClick={() => void browse()}
-          className="h-9 w-9 rounded-[var(--radius-control)] border border-line bg-[#0d1116]"
+          className="h-8 w-8 rounded-[var(--radius-control)] border border-line bg-base-soft"
         >
           <FolderOpen size={14} />
         </IconButton>
       </div>
-      {hint ? <p className="text-[11.5px] leading-[1.45] text-faint">{hint}</p> : null}
+      {hint ? <p className="text-[11.5px] leading-[1.5] text-faint">{hint}</p> : null}
       {action}
     </div>
   );
