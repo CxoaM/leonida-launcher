@@ -3,7 +3,39 @@
 All notable changes to Leonida Launcher are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [1.0.0] — 2026-11-24
+## [1.0.1] – 2026-11-25
+
+Interface pass. No behaviour, data or feature changes.
+
+### Changed
+
+- The whole window now follows one "night workshop" design system: warm graphite
+  surfaces, an off-white primary action, a single safety-orange accent,
+  Bahnschrift display type and measured tick rails.
+- Overview, Installation, Updates, Build, Diagnostics, Settings and About were
+  rebuilt on the same tokens and primitives. Asymmetric columns, flat divided
+  lists and borderless status sections replace gradients, icon tiles and uniform
+  card grids.
+- Overview shows the five workspace stages as a clickable measured rail instead
+  of a separate next-steps card.
+- Updates groups upstream, restore points and history beside the update pipeline
+  and compatibility check; while idle the pipeline lists the stage sequence
+  instead of seven waiting rows.
+- Build shows Time, ETA and stage count as a mono readout, and Diagnostics draws
+  disk usage as bars.
+- The not-installed cards on Build and Updates use the same inner padding as
+  every other card.
+
+### Fixed
+
+- Job states in the update pipeline are localized instead of printing a raw
+  status enum.
+- Build and Updates no longer present "No ETA reported" as if it were a
+  percentage.
+- Dependency kinds are no longer rendered as uppercase micro-labels, and the
+  pipeline card no longer borrows the "Restore point" title.
+
+## [1.0.0] – 2026-11-24
 
 First stable release. Verified against upstream Leonida `a289278` on `main`.
 

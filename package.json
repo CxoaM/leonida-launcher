@@ -1,7 +1,7 @@
 {
   "name": "leonida-launcher",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A premium minimal desktop launcher for the Leonida static recompilation project",
   "type": "module",
   "license": "MIT",
