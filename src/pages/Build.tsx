@@ -206,44 +206,50 @@ export function BuildPage() {
 
       {!installed ? (
         <Card>
-          <EmptyState
-            icon={<Boxes size={16} />}
-            title={t("build.notInstalled.title")}
-            body={t("build.notInstalled.body")}
-            action={
-              <Button variant="primary" onClick={() => setPage("installation")}>
-                {t("install.heading")}
-              </Button>
-            }
-          />
+          <CardBody>
+            <EmptyState
+              icon={<Boxes size={16} />}
+              title={t("build.notInstalled.title")}
+              body={t("build.notInstalled.body")}
+              action={
+                <Button variant="primary" onClick={() => setPage("installation")}>
+                  {t("install.heading")}
+                </Button>
+              }
+            />
+          </CardBody>
         </Card>
       ) : incompatible ? (
         <Card>
-          <EmptyState
-            tone="danger"
-            icon={<AlertTriangle size={16} />}
-            title={t("build.incompatible.title")}
-            body={t("build.incompatible.body")}
-            action={
-              <Button variant="primary" onClick={() => setPage("updates")}>
-                {t("nav.updates")}
-              </Button>
-            }
-          />
+          <CardBody>
+            <EmptyState
+              tone="danger"
+              icon={<AlertTriangle size={16} />}
+              title={t("build.incompatible.title")}
+              body={t("build.incompatible.body")}
+              action={
+                <Button variant="primary" onClick={() => setPage("updates")}>
+                  {t("nav.updates")}
+                </Button>
+              }
+            />
+          </CardBody>
         </Card>
       ) : !buildSupported ? (
         <Card>
-          <EmptyState
-            tone="warn"
-            icon={<AlertTriangle size={16} />}
-            title={t("build.noBuildSupport.title")}
-            body={t("build.noBuildSupport.body")}
-            action={
-              <Button onClick={() => setPage("diagnostics")}>
-                {t("nav.diagnostics")}
-              </Button>
-            }
-          />
+          <CardBody>
+            <EmptyState
+              tone="warn"
+              icon={<AlertTriangle size={16} />}
+              title={t("build.noBuildSupport.title")}
+              body={t("build.noBuildSupport.body")}
+              action={
+                <Button onClick={() => setPage("diagnostics")}>
+                  {t("nav.diagnostics")}
+                </Button>
+              }
+            />
+          </CardBody>
         </Card>
       ) : (
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">

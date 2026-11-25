@@ -234,16 +234,18 @@ export function UpdatesPage() {
 
       {!installed ? (
         <Card>
-          <EmptyState
-            icon={<GitBranch size={16} />}
-            title={t("updates.notInstalled.title")}
-            body={t("updates.notInstalled.body")}
-            action={
-              <Button variant="primary" onClick={() => setPage("installation")}>
-                {t("install.heading")}
-              </Button>
-            }
-          />
+          <CardBody>
+            <EmptyState
+              icon={<GitBranch size={16} />}
+              title={t("updates.notInstalled.title")}
+              body={t("updates.notInstalled.body")}
+              action={
+                <Button variant="primary" onClick={() => setPage("installation")}>
+                  {t("install.heading")}
+                </Button>
+              }
+            />
+          </CardBody>
         </Card>
       ) : (
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
